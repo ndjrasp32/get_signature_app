@@ -1,0 +1,4 @@
+{
+  "apiUrl": "https://script.google.com/macros/s/DEPLOYMENT_ID/exec",
+  "appBaseUrl": "https://YOUR_ACCOUNT.github.io/signature-app/"
+}
