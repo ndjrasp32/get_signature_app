@@ -166,6 +166,85 @@ function diagnoseSignatureAppSetup() {
   return result;
 }
 
+function diagnoseTargetMatchFromTemporaryProperties() {
+  var props = PropertiesService.getScriptProperties();
+  var publicToken = normalize_(props.getProperty("DEBUG_PUBLIC_TOKEN"));
+  var schoolName = normalize_(props.getProperty("DEBUG_SCHOOL_NAME"));
+  var studentNumber = normalize_(props.getProperty("DEBUG_STUDENT_NUMBER"));
+  var name = normalize_(props.getProperty("DEBUG_NAME"));
+
+  if (!publicToken || !schoolName || !studentNumber || !name) {
+    throw new Error(
+      "Script Properties에 DEBUG_PUBLIC_TOKEN, DEBUG_SCHOOL_NAME, DEBUG_STUDENT_NUMBER, DEBUG_NAME을 모두 설정하세요."
+    );
+  }
+
+  var document = findDocumentByPublicToken_(publicToken);
+  var result = {
+    ok: true,
+    input: {
+      public_token: publicToken,
+      school_name: schoolName,
+      student_number: studentNumber,
+      name: name
+    },
+    document_found: Boolean(document),
+    document: document
+      ? {
+          document_id: document.document_id,
+          title: document.title,
+          school_name: document.school_name,
+          status: document.status
+        }
+      : null,
+    target_count_for_document: 0,
+    exact_match_count: 0,
+    school_name_match_count: 0,
+    student_number_match_count: 0,
+    name_match_count: 0,
+    likely_reason: ""
+  };
+
+  if (!document) {
+    result.likely_reason = "public_token에 해당하는 documents 행을 찾을 수 없습니다.";
+    Logger.log(JSON.stringify(result, null, 2));
+    return result;
+  }
+
+  var targets = getRows_(SHEET_NAMES.TARGETS).filter(function (target) {
+    return target.document_id === document.document_id;
+  });
+  var inputKey = [schoolName, studentNumber, name].join("\u001f");
+
+  result.target_count_for_document = targets.length;
+  result.school_name_match_count = targets.filter(function (target) {
+    return normalize_(target.school_name) === schoolName;
+  }).length;
+  result.student_number_match_count = targets.filter(function (target) {
+    return normalize_(target.student_number) === studentNumber;
+  }).length;
+  result.name_match_count = targets.filter(function (target) {
+    return normalize_(target.name) === name;
+  }).length;
+  result.exact_match_count = targets.filter(function (target) {
+    return targetIdentityKey_(target) === inputKey;
+  }).length;
+
+  if (document.status !== "active") {
+    result.likely_reason = "documents.status가 active가 아닙니다.";
+  } else if (targets.length === 0) {
+    result.likely_reason = "이 document_id로 등록된 targets 행이 없습니다.";
+  } else if (result.exact_match_count === 0) {
+    result.likely_reason =
+      "학교명, 학번, 이름 3개가 동시에 일치하는 targets 행이 없습니다.";
+  } else {
+    result.likely_reason = "검증 입력값과 일치하는 대상자가 있습니다.";
+  }
+
+  Logger.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
 function createSignatureSpreadsheet() {
   var ss = SpreadsheetApp.create("signature-app-data");
   PropertiesService.getScriptProperties().setProperty("SPREADSHEET_ID", ss.getId());

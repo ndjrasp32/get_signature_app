@@ -50,6 +50,25 @@ SPREADSHEET_ID = 복사한 Sheet ID
 
 새 Sheet를 자동으로 만들고 싶다면 `createSignatureSpreadsheet`를 실행해도 됩니다. 실행 후 로그에 나온 `spreadsheet_url`을 열면 `documents`, `targets`, `audit_logs` 시트가 만들어져 있습니다.
 
+### 대상자 확인이 계속 실패할 때
+
+서명 화면의 “대상자 정보를 확인할 수 없습니다”는 보안을 위해 일부러 자세한 이유를 숨긴 메시지입니다. 관리자는 아래 순서로 원인을 확인할 수 있습니다.
+
+1. 관리자 화면 문서 상세에서 `전체` 숫자를 확인합니다. 0이면 대상자 등록이 안 된 상태입니다.
+2. 표에 보이는 `학교명`, `학번`, `이름`을 서명 화면에 그대로 입력합니다.
+3. 계속 실패하면 Apps Script Script Properties에 임시 디버그 값을 넣습니다.
+
+```text
+DEBUG_PUBLIC_TOKEN = 서명 링크의 doc 값
+DEBUG_SCHOOL_NAME = 입력한 학교명
+DEBUG_STUDENT_NUMBER = 입력한 학번
+DEBUG_NAME = 입력한 이름
+```
+
+4. Apps Script 편집기에서 `diagnoseTargetMatchFromTemporaryProperties`를 실행합니다.
+5. 실행 로그의 `likely_reason`, `target_count_for_document`, `exact_match_count`를 확인합니다.
+6. 확인이 끝나면 `DEBUG_*` Script Properties는 삭제합니다.
+
 ## 프론트엔드 로컬 실행
 
 ```bash
