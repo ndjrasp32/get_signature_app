@@ -27,6 +27,29 @@ GitHub Pages에 올리는 정적 React/Vite 앱과 Google Apps Script Web App, G
 
 관리자 비밀번호는 `ADMIN_PASSWORD_SALT`, `ADMIN_PASSWORD_HASH`로 Script Properties에 저장됩니다. bcrypt가 아니라 SHA-256 + salt 방식이므로, 강한 비밀번호를 쓰고 Sheet/App Script 편집 권한을 엄격히 제한하세요.
 
+### 초기화했는데 시트가 안 생길 때
+
+가장 흔한 원인은 Apps Script가 Google Sheet에 연결되지 않은 단독 프로젝트인 경우입니다.
+
+1. Apps Script 왼쪽의 `실행 기록`에서 `initializeSignatureSheets` 실행이 성공인지 실패인지 확인합니다.
+2. `diagnoseSignatureAppSetup` 함수를 실행하고 로그를 봅니다.
+3. 로그의 `target_spreadsheet_url`이 내가 보고 있는 Google Sheet와 같은지 확인합니다.
+4. 단독 Apps Script 프로젝트라면 Sheet URL에서 ID를 복사합니다.
+
+```text
+https://docs.google.com/spreadsheets/d/여기가_SPREADSHEET_ID/edit
+```
+
+5. Apps Script `프로젝트 설정 > 스크립트 속성`에 아래 값을 추가합니다.
+
+```text
+SPREADSHEET_ID = 복사한 Sheet ID
+```
+
+6. 다시 `initializeSignatureSheets`를 실행합니다.
+
+새 Sheet를 자동으로 만들고 싶다면 `createSignatureSpreadsheet`를 실행해도 됩니다. 실행 후 로그에 나온 `spreadsheet_url`을 열면 `documents`, `targets`, `audit_logs` 시트가 만들어져 있습니다.
+
 ## 프론트엔드 로컬 실행
 
 ```bash

@@ -112,6 +112,73 @@ function initializeSignatureSheets() {
   ss.getSheetByName(SHEET_NAMES.DOCUMENTS).getRange("A:H").setNumberFormat("@");
   ss.getSheetByName(SHEET_NAMES.TARGETS).getRange("A:K").setNumberFormat("@");
   ss.getSheetByName(SHEET_NAMES.AUDIT_LOGS).getRange("A:H").setNumberFormat("@");
+
+  var result = {
+    ok: true,
+    spreadsheet_id: ss.getId(),
+    spreadsheet_name: ss.getName(),
+    spreadsheet_url: ss.getUrl(),
+    sheets: ss.getSheets().map(function (sheet) {
+      return sheet.getName();
+    })
+  };
+  Logger.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
+function diagnoseSignatureAppSetup() {
+  var props = PropertiesService.getScriptProperties();
+  var result = {
+    ok: true,
+    spreadsheet_id_property: props.getProperty("SPREADSHEET_ID") || "",
+    active_spreadsheet_id: "",
+    active_spreadsheet_name: "",
+    target_spreadsheet_id: "",
+    target_spreadsheet_name: "",
+    target_spreadsheet_url: "",
+    sheets: []
+  };
+
+  try {
+    var active = SpreadsheetApp.getActiveSpreadsheet();
+    if (active) {
+      result.active_spreadsheet_id = active.getId();
+      result.active_spreadsheet_name = active.getName();
+    }
+  } catch (error) {
+    result.active_spreadsheet_error = error && error.message ? error.message : String(error);
+  }
+
+  try {
+    var ss = getSpreadsheet_();
+    result.target_spreadsheet_id = ss.getId();
+    result.target_spreadsheet_name = ss.getName();
+    result.target_spreadsheet_url = ss.getUrl();
+    result.sheets = ss.getSheets().map(function (sheet) {
+      return sheet.getName();
+    });
+  } catch (error2) {
+    result.ok = false;
+    result.error = error2 && error2.message ? error2.message : String(error2);
+  }
+
+  Logger.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
+function createSignatureSpreadsheet() {
+  var ss = SpreadsheetApp.create("signature-app-data");
+  PropertiesService.getScriptProperties().setProperty("SPREADSHEET_ID", ss.getId());
+  initializeSignatureSheets();
+
+  var result = {
+    ok: true,
+    spreadsheet_id: ss.getId(),
+    spreadsheet_name: ss.getName(),
+    spreadsheet_url: ss.getUrl()
+  };
+  Logger.log(JSON.stringify(result, null, 2));
+  return result;
 }
 
 function setAdminPasswordFromPrompt() {
