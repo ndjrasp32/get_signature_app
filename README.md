@@ -27,6 +27,13 @@ GitHub Pages에 올리는 정적 React/Vite 앱과 Google Apps Script Web App, G
 
 관리자 비밀번호는 `ADMIN_PASSWORD_SALT`, `ADMIN_PASSWORD_HASH`로 Script Properties에 저장됩니다. bcrypt가 아니라 SHA-256 + salt 방식이므로, 강한 비밀번호를 쓰고 Sheet/App Script 편집 권한을 엄격히 제한하세요.
 
+`FRONTEND_BASE_URL`은 GitHub 레포 주소가 아니라 GitHub Pages 주소여야 합니다.
+
+```text
+좋음: https://YOUR_ACCOUNT.github.io/signature-app/
+나쁨: https://github.com/YOUR_ACCOUNT/signature-app/
+```
+
 ### 초기화했는데 시트가 안 생길 때
 
 가장 흔한 원인은 Apps Script가 Google Sheet에 연결되지 않은 단독 프로젝트인 경우입니다.

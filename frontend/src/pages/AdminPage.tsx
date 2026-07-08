@@ -369,7 +369,7 @@ function DocumentToolbar({
   onPrint: () => void;
   onRefresh: () => void;
 }) {
-  const publicUrl = document.public_url || composePublicUrl(document.public_token);
+  const publicUrl = composePublicUrl(document.public_token);
   const [copied, setCopied] = useState(false);
 
   async function copyUrl() {
