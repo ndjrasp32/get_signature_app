@@ -39,19 +39,32 @@ jobs:
         run: |
           node - <<'NODE'
           const fs = require('fs');
+          const [owner, repoName] = (process.env.GITHUB_REPOSITORY || '').split('/');
+          const defaultBaseUrl =
+            owner && repoName ? `https://${owner}.github.io/${repoName}/` : '';
           const config = {
             apiUrl: process.env.APPS_SCRIPT_WEB_APP_URL || '',
-            appBaseUrl: process.env.PUBLIC_APP_BASE_URL || ''
+            appBaseUrl: process.env.PUBLIC_APP_BASE_URL || defaultBaseUrl
           };
-          if (config.apiUrl || config.appBaseUrl) {
-            fs.writeFileSync(
-              'frontend/public/config.json',
-              `${JSON.stringify(config, null, 2)}\n`
-            );
+
+          if (!config.apiUrl) {
+            console.error('Missing required repository secret: APPS_SCRIPT_WEB_APP_URL');
+            console.error('Set it to the Apps Script Web App URL without ?action=health.');
+            process.exit(1);
           }
+
+          fs.mkdirSync('frontend/public', { recursive: true });
+          fs.writeFileSync(
+            'frontend/public/config.json',
+            `${JSON.stringify(config, null, 2)}\n`
+          );
+          console.log(`Wrote frontend/public/config.json for ${config.appBaseUrl}`);
           NODE
 
       - name: Build
+        env:
+          VITE_APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_WEB_APP_URL }}
+          VITE_PUBLIC_APP_BASE_URL: ${{ secrets.PUBLIC_APP_BASE_URL }}
         working-directory: frontend
         run: npm run build
 

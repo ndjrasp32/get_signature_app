@@ -74,6 +74,20 @@ npm run build
 3. 선택으로 `PUBLIC_APP_BASE_URL`을 추가합니다. 예 `https://YOUR_ACCOUNT.github.io/signature-app/`
 4. `main` 브랜치에 push하거나 Actions에서 수동 실행합니다.
 
+`APPS_SCRIPT_WEB_APP_URL`은 반드시 Repository secret에 넣어야 합니다. 값은 Apps Script Web App URL에서 `?action=health`를 뺀 주소입니다.
+
+```text
+https://script.google.com/macros/s/DEPLOYMENT_ID/exec
+```
+
+배포가 끝난 뒤 아래 주소가 200으로 열리는지 확인합니다.
+
+```text
+https://YOUR_ACCOUNT.github.io/signature-app/config.json
+```
+
+이 파일이 404이면 GitHub Actions 배포가 다시 실행되지 않았거나 `APPS_SCRIPT_WEB_APP_URL` Secret이 비어 있는 상태입니다. Actions 탭에서 `Deploy Frontend to GitHub Pages` 실행 결과를 확인하세요.
+
 서명 링크 형식:
 
 ```text
